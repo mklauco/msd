@@ -14,7 +14,8 @@ function varargout = msd(varargin)
 %   connected with spring and damper to a wall
 %
 %   output Y:
-%   the output vector contains positions of each cart
+%   the output vector contains either position of each cart (default), speed of each
+%   cart, or both.
 %
 % Possible optional arguments:
 %   M [kg] mass of N carts (M is vector)
@@ -29,6 +30,14 @@ function varargout = msd(varargin)
 %
 %   Ctime and Dtime output
 %       [sysc, sysd] = MSD(N, 'both', true)
+%
+%   Output vector contains only speed of each cart 
+%       [sysc, sysd] = MSD(N, 'speeds', true, 'positions', false)
+%
+%   Output vector contains both speed and position of each cart, where the
+%   positions are first N elements of Y vector
+%       [sysc, sysd] = MSD(N, 'positions', true)
+%
 %   
 %  Values M, K, and C can be provided as scalars or vectors of size N. If 
 %  a scalar value is chosen, then all carts will have equal physical 
@@ -50,6 +59,8 @@ p.addParameter('C', default.C, @(x) validateattributes(x,{'numeric'},{'positive'
 p.addParameter('K', default.K, @(x) validateattributes(x,{'numeric'},{'positive'}));
 p.addParameter('Ts', default.Ts, @(x) validateattributes(x,{'numeric'},{'positive'}));
 p.addParameter('both', false, @(x) validateattributes(x,{'logical'},{'scalar'}));
+p.addParameter('positions', true, @(x) validateattributes(x,{'logical'},{'scalar'}));
+p.addParameter('speeds', false, @(x) validateattributes(x,{'logical'},{'scalar'}));
 
 parse(p, varargin{:});
 opt = p.Results;
@@ -138,8 +149,13 @@ end
 
 %% calculating state space matrix B
 B(opt.N+1,1)= 1/M(1) ;
-
-C = eye(opt.N, opt.N*2);
+if opt.positions ==  true && opt.speeds == false
+    C = eye(opt.N, opt.N*2);
+elseif opt.positions ==  false && opt.speeds == true
+    C = [zeros(opt.N, opt.N), eye(opt.N)];
+elseif opt.positions ==  true && opt.speeds == true
+    C = eye(opt.N*2);
+end
 D = zeros(size(C, 1), size(B, 2));
 
 if opt.Ts  ~=  0
