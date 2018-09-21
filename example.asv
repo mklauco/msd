@@ -1,0 +1,8 @@
+%% init
+clear
+close all
+
+%% MSD specification
+N = 3;
+M = [10; 15; 20];
+K = 20; 20; 20];
