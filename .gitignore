@@ -1,1 +1,7 @@
 *.asv
+*.aux
+*.auxlock
+*.log
+*.gz
+*.dpth
+*.md5
